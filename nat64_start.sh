@@ -22,7 +22,8 @@
 #
 # get WAN interface from UCI
 WAN=$(/sbin/uci get network.wan.ifname)
-WAN6=""
+WAN6=$(/sbin/uci get network.wan6.ifname)
+LAN6=$(/sbin/uci get network.lan6.ifname)
 
 # Define files
 tayga_conf="/etc/tayga.conf"
@@ -109,7 +110,7 @@ done
 
 
 # get some IP addresses from Router
-LAN_IP6=$(ip addr | grep '::1' | grep noprefixroute | grep -v 'deprecated' | grep -v 'inet6 fd' | awk '{print $2}' | cut -f 1 -d '/')
+LAN_IP6=$(ip addr show dev "$LAN6" | grep "inet6 " | grep -v fe80 | awk '{print $2}' | cut  -f 1 -d '/')
  
 WAN_IP4=$(ip addr show dev "$WAN" | grep "inet " | awk '{print $2}' | cut  -f 1 -d '/')
 
@@ -140,7 +141,6 @@ if [ "$WAN_IP4" == "" ]; then
 	echo "ERROR: WAN GUA IPv4 not detected. NAT64 requires WAN IPv4 connectivity"
 	exit 1
 fi
-
 
 # remove old NAT64 firewall entries
 iptables -D forwarding_rule -i nat64 -j ACCEPT
@@ -194,7 +194,7 @@ tayga &
 # test connection
 echo "=== Testing tayga"
 NAT64_FRONT=$(echo $NAT64_PREFIX | cut -d '/' -f 1)
-ping6 -c3 $NAT64_FRONT"8.8.4.4"
+ping6 -I $WAN_IP6 -c3 $NAT64_FRONT"8.8.4.4"
 
 echo "Pau!"
 
