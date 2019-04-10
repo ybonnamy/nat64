@@ -23,7 +23,6 @@
 # get WAN interface from UCI
 WAN=$(/sbin/uci get network.wan.ifname)
 WAN6=$(/sbin/uci get network.wan6.ifname)
-LAN6=$(/sbin/uci get network.lan6.ifname)
 
 # Define files
 tayga_conf="/etc/tayga.conf"
@@ -110,7 +109,7 @@ done
 
 
 # get some IP addresses from Router
-LAN_IP6=$(ip addr show dev "$LAN6" | grep "inet6 " | grep -v fe80 | awk '{print $2}' | cut  -f 1 -d '/')
+LAN_IP6=$(/sbin/uci get network.lan6.ip6addr | cut  -f 1 -d '/')
  
 WAN_IP4=$(ip addr show dev "$WAN" | grep "inet " | awk '{print $2}' | cut  -f 1 -d '/')
 
